@@ -4,6 +4,9 @@
 #include <QWidget>
 #include <QStandardItemModel>
 #include <QPushButton>
+#include <QFileDialog>
+#include <QDir>
+#include <streamproducer.h>
 
 namespace Ui {
 class BoomBoxProducerWidget;
@@ -20,14 +23,13 @@ public:
 private slots:
     void on_addButton_clicked();
     void on_rowInTable_doubleClicked(const QModelIndex &);
-
     void on_nextTrackButton_clicked();
-
     void on_previousTrackButton_clicked();
 
 private:
     Ui::BoomBoxProducerWidget *ui;
     QStandardItemModel *playListModel;
+    StreamProducer *streamProducer;
 
 private:
     void prepareButtons();

@@ -1,13 +1,11 @@
 #include "boomboxproducerwidget.h"
 #include "ui_boomboxproducerwidget.h"
-#include <QFileDialog>
-#include <QDir>
 
 BoomBoxProducerWidget::BoomBoxProducerWidget(QWidget *parent) : QWidget(parent), ui(new Ui::BoomBoxProducerWidget) {
     ui->setupUi(this);
     playListModel = new QStandardItemModel(this);
     playListModel->setHorizontalHeaderLabels(QStringList("Filename"));
-
+    streamProducer = new StreamProducer();
 
     prepareButtons();
 
@@ -58,7 +56,7 @@ void BoomBoxProducerWidget::on_addButton_clicked()
 }
 
 void BoomBoxProducerWidget::on_rowInTable_doubleClicked(const QModelIndex &index) {
-    playListModel->data(index).toString();
+    startStream(playListModel->index(index.row(), 1).data().toString());
 }
 
 
@@ -95,4 +93,5 @@ void BoomBoxProducerWidget::on_previousTrackButton_clicked() {
 
 void BoomBoxProducerWidget::startStream(QString pathToFile) {
     ui->songTitleNowPlayingPlainText->setPlainText(pathToFile);
+    streamProducer->startStreaming(pathToFile.toStdString());
 }
