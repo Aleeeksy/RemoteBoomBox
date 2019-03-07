@@ -6,6 +6,9 @@
 #include <QPushButton>
 #include <QFileDialog>
 #include <QDir>
+#include <QFuture>
+#include <QThread>
+#include <QtConcurrent/QtConcurrent>
 #include <streamproducer.h>
 
 namespace Ui {
@@ -25,11 +28,14 @@ private slots:
     void on_rowInTable_doubleClicked(const QModelIndex &);
     void on_nextTrackButton_clicked();
     void on_previousTrackButton_clicked();
+    void on_pauseButton_clicked();
 
 private:
     Ui::BoomBoxProducerWidget *ui;
     QStandardItemModel *playListModel;
     StreamProducer *streamProducer;
+    QFuture<void> future;
+    QThread *thread;
 
 private:
     void prepareButtons();

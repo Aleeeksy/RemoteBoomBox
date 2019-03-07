@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string>
 #include <string.h>
+#include <QObject>
 
 #define __STDC_CONSTANT_MACROS
 
@@ -18,17 +19,26 @@ extern "C"
 };
 #endif
 
-class StreamProducer
-{
+
+class StreamProducer : public QObject {
+    Q_OBJECT
 public:
-    StreamProducer();
-    void startStreaming(std::string);
+    explicit StreamProducer(QObject *parent = 0);
+    void setInFilePath(std::string);
+    void setAbandoned(bool);
+    void setPaused(bool);
+    bool isAbandoned();
+    bool isPaused();
+
+public slots:
+    void startStreaming();
 
 private:
     void prepareInputSource();
     void prepareOoutputStream();
     void streamLoop();
     int errorHandler(std::string, int);
+    void pauseLoop();
 
 private:
     AVOutputFormat *outputFormat;
@@ -36,9 +46,11 @@ private:
     AVFormatContext *inputFormatContext;
     AVFormatContext *outputFormatContext;
     AVPacket packet;
-    const char *inFilePath;
-    const char *outStreamName;
+    std::string outStreamName;
+    std::string inFilePath;
     int streamIndex;
+    bool abandoned;
+    bool paused;
 };
 
 #endif // STREAMPRODUCER_H

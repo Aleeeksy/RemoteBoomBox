@@ -3,8 +3,10 @@
 
 BoomBoxProducerWidget::BoomBoxProducerWidget(QWidget *parent) : QWidget(parent), ui(new Ui::BoomBoxProducerWidget) {
     ui->setupUi(this);
+    QCoreApplication::processEvents();
+
     playListModel = new QStandardItemModel(this);
-    playListModel->setHorizontalHeaderLabels(QStringList("Filename"));
+    playListModel->setHorizontalHeaderLabels(QStringList() << "Filename" << "");
     streamProducer = new StreamProducer();
 
     prepareButtons();
@@ -17,18 +19,29 @@ BoomBoxProducerWidget::BoomBoxProducerWidget(QWidget *parent) : QWidget(parent),
     ui->playlistView->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->playlistView->horizontalHeader()->setStretchLastSection(true);
 
+
     connect(ui->playlistView, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(on_rowInTable_doubleClicked(const QModelIndex &)));
+    thread = new QThread();
+    streamProducer->moveToThread(thread);
+    connect(thread, SIGNAL(started()), streamProducer, SLOT(startStreaming()));
+
 }
 
 BoomBoxProducerWidget::~BoomBoxProducerWidget() {
     delete ui;
+    delete playListModel;
+    close();
+    if(!thread->wait(1000)) {
+        thread->terminate();
+    }
+    qApp->quit();
+
 }
 
 void BoomBoxProducerWidget::prepareButtons() {
     setButtonIcon(":/icons/icons/add-button.png", ui->addButton);
     setButtonIcon(":/icons/icons/play-button.png", ui->playButton);
     setButtonIcon(":/icons/icons/pause-button.png", ui->pauseButton);
-    setButtonIcon(":/icons/icons/stop-button.png", ui->stopButton);
     setButtonIcon(":/icons/icons/previous-track-button.png", ui->previousTrackButton);
     setButtonIcon(":/icons/icons/next-track-button.png", ui->nextTrackButton);
 }
@@ -55,7 +68,12 @@ void BoomBoxProducerWidget::on_addButton_clicked()
     }
 }
 
+void BoomBoxProducerWidget::on_pauseButton_clicked() {
+    streamProducer->setPaused(!streamProducer->isPaused());
+}
+
 void BoomBoxProducerWidget::on_rowInTable_doubleClicked(const QModelIndex &index) {
+    ui->songTitleNowPlayingPlainText->setPlainText(index.data().toString());
     startStream(playListModel->index(index.row(), 1).data().toString());
 }
 
@@ -73,6 +91,7 @@ void BoomBoxProducerWidget::on_nextTrackButton_clicked() {
         ui->playlistView->setCurrentIndex(newIndex);
         ui->playlistView->scrollTo(newIndex);
     }
+    ui->songTitleNowPlayingPlainText->setPlainText(newIndex.data().toString());
     startStream(playListModel->index(newIndex.row(), 1).data().toString());
 }
 
@@ -88,10 +107,20 @@ void BoomBoxProducerWidget::on_previousTrackButton_clicked() {
         ui->playlistView->setCurrentIndex(newIndex);
         ui->playlistView->scrollTo(newIndex);
     }
-    startStream(playListModel->index(newIndex.row(), 1).data().toString());
+    ui->songTitleNowPlayingPlainText->setPlainText(newIndex.data().toString());
+    QString pathToFile = playListModel->index(newIndex.row(), 1).data().toString();
 }
 
 void BoomBoxProducerWidget::startStream(QString pathToFile) {
-    ui->songTitleNowPlayingPlainText->setPlainText(pathToFile);
-    streamProducer->startStreaming(pathToFile.toStdString());
+    if( thread->isRunning() ) {
+        streamProducer->setAbandoned(true); //Tell the thread to abort
+        if(!thread->wait(5000)) //Wait until it actually has terminated (max. 5 sec)
+        {
+            thread->terminate(); //Thread didn't exit in time, probably deadlocked, terminate it!
+            thread->wait(); //Note: We have to wait again here!
+        }
+    }
+    streamProducer->setAbandoned(false);
+    streamProducer->setInFilePath(pathToFile.toStdString());
+    thread->start();
 }

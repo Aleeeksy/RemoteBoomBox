@@ -1,16 +1,17 @@
 #include "streamproducer.h"
 
-StreamProducer::StreamProducer() {
+StreamProducer::StreamProducer(QObject *parent) : QObject(parent) {
     outputFormat = NULL;
     //Input AVFormatContext and Output AVFormatContext
     inputFormatContext = NULL;
     outputFormatContext = NULL;
     streamIndex = 1;
+    abandoned = false;
+    paused = false;
     outStreamName = "udp://127.0.0.1:2300";
 }
 
-void StreamProducer::startStreaming(std::string pathToInputFile) {
-    inFilePath = pathToInputFile.c_str();
+void StreamProducer::startStreaming() {
     av_register_all();
 
     //Network
@@ -23,7 +24,7 @@ void StreamProducer::startStreaming(std::string pathToInputFile) {
 
 void StreamProducer::prepareInputSource() {
     int ret;
-    if ((ret = avformat_open_input(&inputFormatContext, inFilePath, 0, 0)) < 0) {
+    if ((ret = avformat_open_input(&inputFormatContext, inFilePath.c_str(), 0, 0)) < 0) {
         errorHandler("Could not open input file", ret);
     }
 
@@ -38,11 +39,11 @@ void StreamProducer::prepareInputSource() {
         }
     }
 
-    av_dump_format(inputFormatContext, 0, inFilePath, 0);
+    av_dump_format(inputFormatContext, 0, inFilePath.c_str(), 0);
 }
 
 void StreamProducer::prepareOoutputStream() {
-    avformat_alloc_output_context2(&outputFormatContext, NULL, "mp2", outStreamName);//UDP
+    avformat_alloc_output_context2(&outputFormatContext, NULL, "mp2", outStreamName.c_str());//UDP
 
     if (!outputFormatContext) {
         errorHandler("Could not create output context", AVERROR_UNKNOWN);
@@ -66,18 +67,18 @@ void StreamProducer::prepareOoutputStream() {
         }
     }
     //Dump Format------------------
-    av_dump_format(outputFormatContext, 0, outStreamName, 1);
+    av_dump_format(outputFormatContext, 0, outStreamName.c_str(), 1);
     //Open output URL
     if (!(outputFormat->flags & AVFMT_NOFILE)) {
-        if (int ret = avio_open(&outputFormatContext->pb, outStreamName, AVIO_FLAG_WRITE) < 0) {
+        if (int ret = avio_open(&outputFormatContext->pb, outStreamName.c_str(), AVIO_FLAG_WRITE) < 0) {
             std::string errorMessage = "Could not open output URL: ";
-            errorHandler(errorMessage.append(outStreamName), ret);
+            errorHandler(errorMessage.append(outStreamName.c_str()), ret);
         }
     }
     //Write file header
     if (int ret = avformat_write_header(outputFormatContext, NULL) < 0) {
         std::string errorMessage = "Error occurred when opening output URL: ";
-        errorHandler(errorMessage.append(outStreamName), ret);
+        errorHandler(errorMessage.append(outStreamName.c_str()), ret);
     }
 }
 
@@ -124,7 +125,7 @@ void StreamProducer::streamLoop() {
         packet.pos = -1;
         //Print to Screen
         if(packet.stream_index==streamIndex){
-            printf("Send %8d video frames to output URL\n",frameIndex);
+            printf("Send %8d audio to output URL\n",frameIndex);
             frameIndex++;
         }
 
@@ -134,10 +135,23 @@ void StreamProducer::streamLoop() {
         }
 
         av_free_packet(&packet);
+        if(abandoned) {
+            errorHandler("Quit before time", 0);
+            return;
+        }
 
+        if(paused) {
+            pauseLoop();
+        }
     }
     //Write file trailer
     av_write_trailer(outputFormatContext);
+}
+
+void StreamProducer::pauseLoop() {
+    while(paused) {
+
+    }
 }
 
 int StreamProducer::errorHandler(std::string errorMessage, int errorCode) {
@@ -152,4 +166,24 @@ int StreamProducer::errorHandler(std::string errorMessage, int errorCode) {
     printf("%d :: %s", errorCode, errorMessage);
 
     return 0;
+}
+
+void StreamProducer::setInFilePath(std::string pathToFile) {
+    inFilePath = pathToFile;
+}
+
+void StreamProducer::setAbandoned(bool abandoned) {
+    this->abandoned = abandoned;
+}
+
+void StreamProducer::setPaused(bool paused) {
+    this->paused = paused;
+}
+
+bool StreamProducer::isAbandoned() {
+    return abandoned;
+}
+
+bool StreamProducer::isPaused() {
+    return paused;
 }
