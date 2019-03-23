@@ -18,8 +18,8 @@
  * graficznego aplikacji stremującej audio
  * jak również za obsługę eventów.
  *
- * Interfej graficzny u
- * - możliwia wczyatnie listy plików
+ * Interfej graficzny umożliwia:
+ * - wczyatnie listy plików
  * - dowolne przełączanie się między nimi, co skutkuje zmianą streamowanego utworu
  * - zatrzymanie / wznowienie streamu
  *

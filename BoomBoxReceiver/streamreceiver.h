@@ -27,14 +27,37 @@ extern "C" {
 };
 #endif
 
+/*!
+ * \brief The StreamReceiver class
+ *
+ * Klasa odpowiada za odczytytywanie, dekodowanie oraz odtwarzanie streamu
+ *
+ */
 class StreamReceiver : public QObject {
   Q_OBJECT
  public:
   explicit StreamReceiver(QObject* parent = 0);
-  void prepareToRecevingStream(std::string);
+    /*!
+   * \brief prepareToRecevingStream
+   * @param inputStream - adres URL streamu
+   *
+   * Metoda ta odpowiada za otwarcie streamu, odczytanie informacji, odnalezienie streamu audio, odczytanie kodeku
+   *
+   */
+  void prepareToRecevingStream(std::string inputStream);
+  /*!
+   * \brief getSamplesPerChannel
+   * \return - zwraca ilość próbek dla kanałów
+   */
   int getSamplesPerChannel();
 
  public slots:
+  /*!
+   * \brief startRecevingStream
+   *
+   * Metoda ta roczpoczyna odbieranie streamu, po wcześniejszym przygotowaniu w prepareToRecevingStream
+   *
+   */
   void startRecevingStream();
 
  signals:

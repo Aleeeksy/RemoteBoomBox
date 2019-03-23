@@ -12,7 +12,7 @@ SimpleVisualizationType::~SimpleVisualizationType() {}
 
 void SimpleVisualizationType::draw(std::tuple<float*, float*> channelsData) {
   int size =
-      samplesPerChannel / 2 * 2;  // half is usable, but we have re and im
+      samplesPerChannel / 2 * 2;
 
   for (int i = 0, index = 0; i < size; i += size / WIDTH) {
     if (index % 300 == 0) {
@@ -29,7 +29,6 @@ void SimpleVisualizationType::draw(std::tuple<float*, float*> channelsData) {
     float im_r = std::get<1>(channelsData)[i];
     float re_r = std::get<1>(channelsData)[i + 1];
     double magnitude_r = sqrt(im_r * im_r + re_r * re_r);
-    // double magnitude = 10 * log10(im * im + re * re);
 
     rightBands.pop_front();
     rightBands.push_back((int16_t)(magnitude * HEIGHT));

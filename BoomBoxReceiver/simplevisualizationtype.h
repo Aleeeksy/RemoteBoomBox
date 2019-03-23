@@ -11,9 +11,22 @@
 
 class SimpleVisualizationType : public VisualizationType {
  public:
-  SimpleVisualizationType(int samplesPerChannel, QGraphicsView*);
+
+    /*!
+   * \brief SimpleVisualizationType
+   * \param samplesPerChannel - liczba próbek na kanał
+   * \param graphicView - obiekt QGraphicsView
+   */
+  SimpleVisualizationType(int samplesPerChannel, QGraphicsView* graphicView);
   ~SimpleVisualizationType();
-  void draw(std::tuple<float*, float*>);
+  /*!
+ * \brief draw
+ *
+ * @param channelsData krotka zawierająca tablice z obliczonymi fft dla lewego i prawego kanału
+ *
+ * Funckja rysuje wizualizacjie na podstawie pierwiastka z sumy kwadratów części rzeczywistej i urojonej watości fft
+ */
+  void draw(std::tuple<float*, float*> channelsData);
 
  private:
   void show();

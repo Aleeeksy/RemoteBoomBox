@@ -9,6 +9,18 @@
 #include <QtConcurrent/QtConcurrent>
 #include <tuple>
 
+/*!
+ * \brief The BoomBoxReceiver class
+ *
+ * Klasa ta odpowiada za przygotowanie interfejsu
+ * graficznego aplikacji odbierającej stream audio
+ * oraz ubsługę akcji użytkownika.
+ *
+ * Interfej graficzny umożliwia
+ * - podanie adresu URL na którym na nasłuchiwać(protokół UDP)
+ * - wybranie typu wizualizacji
+ *
+ */
 namespace Ui {
 class BoomBoxReceiver;
 }

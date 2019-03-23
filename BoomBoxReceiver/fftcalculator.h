@@ -19,7 +19,16 @@ extern "C" {
 class FftCalculator {
  public:
   FftCalculator(int samples);
+  /*!
+   * \brief calculate
+   * \param data - zdekodowane i znormalizowane dane z jednj ramki
+   * \return std::tuple<float*, float*> krotka z obliczoną fft dla lewego i prawgo kanału audio
+   */
   std::tuple<float*, float*> calculate(int16_t *data);
+  /*!
+   * \brief getSamplesPerChannel
+   * \return int - liczba próbek dla kanału
+   */
   int getSamplesPerChannel();
  private:
   RDFTContext* rdftContext;

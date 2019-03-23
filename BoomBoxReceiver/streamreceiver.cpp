@@ -29,7 +29,7 @@ void StreamReceiver::prepareToRecevingStream(std::string inputStream) {
   if ((streamIndex = av_find_best_stream(formatContext, AVMEDIA_TYPE_AUDIO, -1,
                                          -1, &codec, 0)) < 0) {
     av_log(NULL, AV_LOG_ERROR,
-           "Cannot find a audio stream in the input file\n");
+           "Cannot find a audio stream in the input stream\n");
     return;
   }
 
@@ -55,13 +55,10 @@ void StreamReceiver::startRecevingStream() {
   ao_device* aoDevice = prepareAudioPlayback(sampleFormat);
   streamLoop(sampleFormat, aoDevice, resample);
 
-  // clean up
-  // swr_free(&swr);
   avcodec_close(codecContext);
   avformat_free_context(formatContext);
   avformat_close_input(&formatContext);
 
-  // success
   return;
 }
 
