@@ -1,11 +1,10 @@
-#include "boomboxproducerwidget.h"
 #include <QApplication>
+#include "boomboxproducerwidget.h"
 
-int main(int argc, char *argv[])
-{
-    QApplication a(argc, argv);
-    BoomBoxProducerWidget w;
-    w.show();
+int main(int argc, char* argv[]) {
+  QApplication a(argc, argv);
+  BoomBoxProducerWidget w;
+  w.show();
 
-    return a.exec();
+  return a.exec();
 }
