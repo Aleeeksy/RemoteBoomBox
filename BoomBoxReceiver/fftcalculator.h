@@ -15,7 +15,12 @@ extern "C" {
 #ifdef __cplusplus
 };
 #endif
-
+/*!
+ * \brief The FftCalculator class
+ *
+ * Klasa odpowiada za liczenie fft(FAST Fourier Transform)
+ *
+ */
 class FftCalculator {
  public:
   FftCalculator(int samples);

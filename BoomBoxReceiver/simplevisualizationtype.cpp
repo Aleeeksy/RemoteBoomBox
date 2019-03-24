@@ -22,7 +22,6 @@ void SimpleVisualizationType::draw(std::tuple<float*, float*> channelsData) {
     float re = std::get<0>(channelsData)[i + 1];
     double magnitude = sqrt(im * im + re * re);
 
-    // Visualize magnitude of i-th band
     leftBands.pop_front();
     leftBands.push_back((int16_t)(magnitude * HEIGHT));
 
